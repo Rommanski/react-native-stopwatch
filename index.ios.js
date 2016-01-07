@@ -15,13 +15,17 @@ var {
   ListView,
 } = React;
 
+var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
 var stopwatch = React.createClass({
   getInitialState: function() {
+
     return {
       timeElapsed: null,
       running: false,
       startTime: null,
-      laps: []
+      laps: [],
+      dataSource: ds.cloneWithRows([]),
     }
   },
 
@@ -57,9 +61,18 @@ var stopwatch = React.createClass({
   },
 
   listObjects : function() {
-    return this.state.laps.map( function(l) {
-      return <Text>{formatTime(l)}</Text>
-    });
+    return <ListView
+      dataSource={this.state.dataSource}
+      renderRow={this._renderRow}
+    />
+  },
+
+  _renderRow: function(rowData: string, sectionID: number, rowID: number) {
+    return (
+      <Text>
+        {formatTime(rowData)}
+      </Text>
+    );
   },
 
   handleStartPress : function() {
@@ -84,6 +97,7 @@ var stopwatch = React.createClass({
     this.setState({
       startTime : new Date(),
       laps : this.state.laps.concat([this.state.timeElapsed]),
+      dataSource : ds.cloneWithRows(this.state.laps)
     })
   },
 
